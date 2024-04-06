@@ -34,28 +34,34 @@ class RemoteConnectionObjectFactory:
                     server.ssh_username = ssh_username
                     server.ssh_password = ssh_password
 
-                    shell = RemoteMachineShellConnection(server)
-                    os_info = RemoteMachineShellConnection.get_info_for_server(server)
-                    shell.disconnect()
+                    try:
+                        shell = RemoteMachineShellConnection(server)
+                        os_info = RemoteMachineShellConnection.get_info_for_server(server)
+                        shell.disconnect()
 
-                    if os_info.type.lower() == "linux":
-                        if os_info.deliverable_type.lower() == "deb":
-                            target_object = DebianHelper(ipaddr, ssh_username, ssh_password)
-                        elif os_info.deliverable_type.lower() == "rpm":
-                            if "suse" not in os_info.distribution_version.lower():
-                                target_object = RPMHelper(ipaddr, ssh_username, ssh_password)
+                        if os_info.type.lower() == "linux":
+                            if os_info.deliverable_type.lower() == "deb":
+                                target_object = DebianHelper(ipaddr, ssh_username, ssh_password)
+                            elif os_info.deliverable_type.lower() == "rpm":
+                                if "suse" not in os_info.distribution_version.lower():
+                                    target_object = RPMHelper(ipaddr, ssh_username, ssh_password)
+                                else:
+                                    target_object = SUSEHelper(ipaddr, ssh_username, ssh_password)
                             else:
-                                target_object = SUSEHelper(ipaddr, ssh_username, ssh_password)
+                                target_object = LinuxHelper(ipaddr, ssh_username, ssh_password)
+                        elif os_info.type.lower() == "mac":
+                            target_object = MacHelper(ipaddr, ssh_username, ssh_password)
+                        elif os_info.type.lower() == "windows":
+                            target_object = WindowsHelper(ipaddr, ssh_username, ssh_password)
                         else:
-                            target_object = LinuxHelper(ipaddr, ssh_username, ssh_password)
-                    elif os_info.type.lower() == "mac":
-                        target_object = MacHelper(ipaddr, ssh_username, ssh_password)
-                    elif os_info.type.lower() == "windows":
-                        target_object = WindowsHelper(ipaddr, ssh_username, ssh_password)
-                    else:
-                        target_object = RemoteConnectionHelper(ipaddr, ssh_username, ssh_password)
-                    RemoteConnectionObjectFactory._objs[ipaddr]["object"] = target_object
+                            target_object = RemoteConnectionHelper(ipaddr, ssh_username, ssh_password)
+                        RemoteConnectionObjectFactory._objs[ipaddr]["object"] = target_object
+                    except Exception as e:
+                        RemoteConnectionObjectFactory._objs[ipaddr]["object"] = e
 
+        if isinstance(RemoteConnectionObjectFactory._objs[ipaddr]["object"], Exception):
+            raise RemoteConnectionObjectFactory._objs[ipaddr]["object"]
+        
         return RemoteConnectionObjectFactory._objs[ipaddr]["object"]
 
     @staticmethod
