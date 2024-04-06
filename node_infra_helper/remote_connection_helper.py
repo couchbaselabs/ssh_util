@@ -1,6 +1,7 @@
 from shell_util.remote_connection import RemoteMachineShellConnection
 from install_util.test_input import TestInputServer
 import logging
+import threading
 class RemoteConnectionHelper:
     def __init__(self, ipaddr, ssh_username, ssh_password) -> None:
         server = TestInputServer()
@@ -11,6 +12,7 @@ class RemoteConnectionHelper:
         self.shell = RemoteMachineShellConnection(server)
 
         self.logger = logging.getLogger("helper")
+        self.lock = threading.Lock()
 
     def __del__(self):
         self.shell.disconnect()

@@ -7,8 +7,9 @@ class DebianHelper(LinuxHelper):
         super().__del__()
 
     def install_package(self, package):
-        command = f"apt-get install -y {package}"
-        output, error = self.shell.execute_command(command)
+        with self.lock:
+            command = f"apt-get install -y {package}"
+            output, error = self.shell.execute_command(command)
         if len(error) > 0:
             msg = f"Command {command} failed with error {error}"
             self.logger.error(msg)
@@ -16,8 +17,9 @@ class DebianHelper(LinuxHelper):
         return output
 
     def apt_update(self):
-        command = "apt-get update"
-        output, error = self.shell.execute_command(command)
+        with self.lock:
+            command = "apt-get update"
+            output, error = self.shell.execute_command(command)
         if len(error) > 0:
             msg = f"Command {command} failed with error {error}"
             self.logger.error(msg)
@@ -25,8 +27,9 @@ class DebianHelper(LinuxHelper):
         return output
 
     def install_timesyncd(self):
-        command =  "systemctl unmask systemd-timesyncd; apt-get remove -y systemd-timesyncd; apt-get install -y systemd-timesyncd; systemctl start systemd-timesyncd;"
-        output, error = self.shell.execute_command(command)
+        with self.lock:
+            command =  "systemctl unmask systemd-timesyncd; apt-get remove -y systemd-timesyncd; apt-get install -y systemd-timesyncd; systemctl start systemd-timesyncd;"
+            output, error = self.shell.execute_command(command)
         if len(error) > 0:
             msg = f"Command {command} failed with error {error}"
             self.logger.error(msg)
@@ -34,8 +37,9 @@ class DebianHelper(LinuxHelper):
         return output
 
     def set_journalctl_config(self, vacuum_size="100M", vacuum_time="10d"):
-        command =  f"journalctl --vacuum-size={vacuum_size};journalctl --vacuum-time={vacuum_time}"
-        output, error = self.shell.execute_command(command)
+        with self.lock:
+            command =  f"journalctl --vacuum-size={vacuum_size};journalctl --vacuum-time={vacuum_time}"
+            output, error = self.shell.execute_command(command)
         if len(error) > 0:
             msg = f"Command {command} failed with error {error}"
             self.logger.error(msg)
