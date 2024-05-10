@@ -1027,13 +1027,15 @@ class CommonShellAPIs(object):
         rest_username = self.server.rest_username
         rest_password = self.server.rest_password
 
-        protocol = "https://" if self.port == "18091" else "http://"
+        print(self.port, type(self.port))
+        protocol = "-k https://" if str(self.port) == "18091" else "http://"
         command = "curl --silent --show-error {4}{0}:{1}@localhost:{2}/diag/eval -X POST -d " \
                   "'ns_config:set(allow_nonlocal_eval, {3}).'"\
             .format(rest_username, rest_password, self.port,
                     state.__str__().lower(), protocol)
+        print("Diag/eval command = {}".format(command))
         output, error = self.execute_command(command)
-        self.log.info(output)
+        self.log.info(output, error)
         try:
             output = output.decode()
         except AttributeError:
