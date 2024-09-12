@@ -99,7 +99,7 @@ class ShellConnection(CommonShellAPIs):
         if o:
             return o
 
-    def get_disk_info(self, win_info=None, mac=False):
+    def get_disk_info(self, win_info=None, mac=False, in_MB=False, path="/"):
         if win_info:
             if 'Total Physical Memory' not in win_info:
                 win_info = self.create_windows_info()
@@ -109,7 +109,11 @@ class ShellConnection(CommonShellAPIs):
         elif mac:
             o, r = self.execute_command_raw('df -hl', debug=False)
         else:
-            o, r = self.execute_command_raw('df -Thl', debug=False)
+            if not in_MB:
+                o, r = self.execute_command_raw('df -Thl', debug=False)
+            else:
+                o, r = self.execute_command_raw('df -lBM {}'.format(path),
+                                                debug=False)
         if o:
             return o
 

@@ -1032,6 +1032,7 @@ class CommonShellAPIs(object):
                   "'ns_config:set(allow_nonlocal_eval, {3}).'"\
             .format(rest_username, rest_password, self.port,
                     state.__str__().lower(), protocol)
+
         output, error = self.execute_command(command)
         self.log.info(output)
         try:
