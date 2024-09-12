@@ -113,7 +113,7 @@ class ShellConnection(CommonShellAPIs):
                 o, r = self.execute_command_raw('df -Thl', debug=False)
             else:
                 o, r = self.execute_command_raw('df -lBM {}'.format(path),
-                                                     debug=False)
+                                                debug=False)
         if o:
             return o
 
