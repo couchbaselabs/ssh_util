@@ -1032,9 +1032,9 @@ class CommonShellAPIs(object):
                   "'ns_config:set(allow_nonlocal_eval, {3}).'"\
             .format(rest_username, rest_password, self.port,
                     state.__str__().lower(), protocol)
-        print("Diag/eval command = {}".format(command))
+
         output, error = self.execute_command(command)
-        self.log.info(output, error)
+        self.log.info(output)
         try:
             output = output.decode()
         except AttributeError:
