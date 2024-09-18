@@ -192,7 +192,6 @@ class InstallSteps(object):
         f_path = "{}/{}".format(".", build_url.split('/')[-1])
         result = node_installer.shell.copy_file_local_to_remote(
             f_path, node_installer.shell.download_dir)
-        node_installer.shell.disconnect()
         return result
 
     def download_build(self, node_installer, build_url,
@@ -208,7 +207,6 @@ class InstallSteps(object):
         if non_root_installer:
             node_installer.shell.execute_cmd("chmod a+x {}/{}"
                                              .format(download_dir, f_name))
-        node_installer.shell.disconnect()
 
 
 class NodeInstaller(Thread):
