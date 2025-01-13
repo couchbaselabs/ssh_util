@@ -118,7 +118,7 @@ class ShellConnection(CommonShellAPIs):
             return o
 
     def connect_with_user(self, user="root"):
-        self.ssh_connect_with_retries(self.ip, user, self.server.password,
+        self.ssh_connect_with_retries(self.ip, user, self.server.ssh_password,
                                       self.server.ssh_key)
 
     def ssh_connect_with_retries(self, ip, ssh_username, ssh_password, ssh_key,
@@ -157,7 +157,8 @@ class ShellConnection(CommonShellAPIs):
                     backoff_time *= 2
 
         if not is_ssh_ok:
-            error_msg = "-->No SSH connectivity to {} even after {} times!\n".format(self.ip, attempt)
+            error_msg = ("-->No SSH connectivity to {} even after {} times!\n"
+                         .format(self.ip, attempt))
             log.error(error_msg)
             if exit_on_failure:
                 log.error("Exit on failure: killing process")
@@ -172,8 +173,11 @@ class ShellConnection(CommonShellAPIs):
         """
         tp = self._ssh_client.get_transport()
         if tp and not tp.active:
-            log.warning("SSH connection to {} inactive, reconnecting...".format(self.ip))
-            self.ssh_connect_with_retries(self.ip, self.username, self.password, self.ssh_key)
+            log.warning("SSH connection to {} inactive, reconnecting..."
+                        .format(self.ip))
+            self.ssh_connect_with_retries(
+                self.ip, self.server.ssh_username, self.server.ssh_password,
+                self.server.ssh_key)
 
     def disconnect(self):
         ShellConnection.disconnections += 1

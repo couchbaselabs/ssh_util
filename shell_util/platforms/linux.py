@@ -34,8 +34,9 @@ class Linux(ShellConnection, LinuxConstants):
         fv = sv = bn = ""
         err_msg = "{} - Couchbase Server not found".format(self.ip)
         if self.nonroot:
-            if self.file_exists('/home/%s/cb/%s' % (self.username, self.cb_path), self.version_file):
-                output = self.read_remote_file('/home/%s/cb/%s' % (self.username, self.cb_path),
+            if self.file_exists('/home/%s/cb/%s' % (self.server.ssh_username,
+                                                    self.cb_path), self.version_file):
+                output = self.read_remote_file('/home/%s/cb/%s' % (self.server.ssh_username, self.cb_path),
                                                self.version_file)
             else:
                 self.log.info(err_msg)
@@ -57,7 +58,7 @@ class Linux(ShellConnection, LinuxConstants):
 
     def is_couchbase_installed(self):
         if self.nonroot:
-            if self.file_exists("/home/%s/" % self.username, NR_INSTALL_LOCATION_FILE):
+            if self.file_exists("/home/%s/" % self.server.ssh_username, NR_INSTALL_LOCATION_FILE):
                 output, error = self.execute_command("cat %s" % NR_INSTALL_LOCATION_FILE)
                 if output and output[0]:
                     self.log.info("Couchbase Server was installed in non default path %s"
@@ -346,13 +347,13 @@ class Linux(ShellConnection, LinuxConstants):
             self.log_command_output(output, error)
             output, error = self.execute_command(command_2)
             self.log_command_output(output, error)
-            self.connect_with_user(user=self.username)
+            self.connect_with_user(user=self.server.ssh_username)
             return
         output, error = self.execute_command(command_1)
         self.log_command_output(output, error, debug=False)
         output, error = self.execute_command(command_2)
         self.log_command_output(output, error, debug=False)
-        self.connect_with_user(user=self.username)
+        self.connect_with_user(user=self.server.ssh_username)
 
     def get_port_recvq(self, port):
         """
