@@ -71,7 +71,7 @@ class CommonShellAPIs(object):
             self.sleep(timeout=poll_interval, message=message)
             num_retries -= 1
         else:
-            log.error("Couchbase server is failed to start!")
+            self.log.error("Couchbase server is failed to start!")
 
     def get_file(self, remotepath, filename, todir):
         if self.file_exists(remotepath, filename):
@@ -81,16 +81,19 @@ class CommonShellAPIs(object):
                     filenames = sftp.listdir(remotepath)
                     for name in filenames:
                         if filename in name:
-                            log.info("found the file {0}/{1}".format(remotepath, name))
-                            sftp.get('{0}/{1}'.format(remotepath, name), todir)
+                            src_file = "{}/{}".format(remotepath, name)
+                            dest_file = "{}/{}".format(todir, name)
+                            self.log.info("Copying {} to {}"
+                                          .format(src_file, dest_file))
+                            sftp.get(src_file, dest_file)
                             sftp.close()
                             return True
                     sftp.close()
                     return False
                 except IOError:
                     return False
-        else:
-            os.system("cp {0} {1}".format('{0}/{1}'.format(remotepath, filename), todir))
+            else:
+                os.system("cp {0} {1}".format('{0}/{1}'.format(remotepath, filename), todir))
 
     def read_remote_file(self, remote_path, filename):
         if self.file_exists(remote_path, filename):
@@ -128,7 +131,7 @@ class CommonShellAPIs(object):
         if self.remote:
             sftp = self._ssh_client.open_sftp()
             try:
-                log.info("removing {0} directory...".format(remote_path))
+                self.log.info("removing {0} directory...".format(remote_path))
                 sftp.rmdir(remote_path)
             except IOError:
                 return False
@@ -161,7 +164,7 @@ class CommonShellAPIs(object):
         if self.remote:
             sftp = self._ssh_client.open_sftp()
             try:
-                log.info("removing {0} directory...".format(remote_path))
+                self.log.info("removing {0} directory...".format(remote_path))
                 self.rmtree(sftp, remote_path)
             except IOError:
                 return False
@@ -208,7 +211,7 @@ class CommonShellAPIs(object):
             pass
         sftp.close()
         if len(files_matched) > 0:
-            log.info("found these files : {0}".format(files_matched))
+            self.log.info("found these files : {0}".format(files_matched))
         return files_matched
 
     # check if this file exists in the remote
@@ -226,7 +229,7 @@ class CommonShellAPIs(object):
             pass
         sftp.close()
         if len(files_matched) > 0:
-            log.info("found these files : {0}".format(files_matched))
+            self.log.info("found these files : {0}".format(files_matched))
         return files_matched
 
     def file_exists(self, remotepath, filename, pause_time=30):
@@ -249,7 +252,7 @@ class CommonShellAPIs(object):
                 elif filename in name.filename and int(name.st_size) == 0:
                     if name.filename == NR_INSTALL_LOCATION_FILE:
                         continue
-                    log.info("File {0} will be deleted".format(filename))
+                    self.log.info("File {0} will be deleted".format(filename))
                     if not remotepath.endswith("/"):
                         remotepath += "/"
                     self.execute_command("rm -rf {0}*{1}*".format(remotepath, filename))
@@ -269,7 +272,7 @@ class CommonShellAPIs(object):
             filenames = sftp.listdir_attr(remotepath)
             for name in filenames:
                 if name.filename == filename:
-                    log.info("File {0} will be deleted".format(filename))
+                    self.log.info("File {0} will be deleted".format(filename))
                     sftp.remove(remotepath + filename)
                     delete_file = True
                     break
@@ -278,7 +281,7 @@ class CommonShellAPIs(object):
                 filenames = sftp.listdir_attr(remotepath)
                 for name in filenames:
                     if name.filename == filename:
-                        log.error("fail to remove file %s " % filename)
+                        self.log.error("fail to remove file %s " % filename)
                         delete_file = False
                         break
             sftp.close()
@@ -333,13 +336,13 @@ class CommonShellAPIs(object):
             for name in files:
                 if name == file:
                     found_it = os.path.join(remote_path, name)
-                    log.info("File {0} was found".format(found_it))
+                    self.log.info("File {0} was found".format(found_it))
                     return found_it
             else:
-                log.error('File(s) name in {0}'.format(remote_path))
+                self.log.error('File(s) name in {0}'.format(remote_path))
                 for name in files:
-                    log.info(name)
-                log.error('Can not find {0}'.format(file))
+                    self.log.info(name)
+                self.log.error('Can not find {0}'.format(file))
         except IOError:
             pass
         sftp.close()
@@ -347,29 +350,29 @@ class CommonShellAPIs(object):
     def create_directory(self, remote_path):
         sftp = self._ssh_client.open_sftp()
         try:
-            log.info("Checking if the directory {0} exists or not.".format(remote_path))
+            self.log.info("Checking if the directory {0} exists or not.".format(remote_path))
             sftp.stat(remote_path)
         except IOError as e:
             if e.errno == 2:
-                log.info("Directory at {0} DOES NOT exist. We will create on here".format(remote_path))
+                self.log.info("Directory at {0} DOES NOT exist. We will create on here".format(remote_path))
                 sftp.mkdir(remote_path)
                 sftp.close()
                 return False
             raise
         else:
-            log.error("Directory at {0} DOES exist. Fx returns True".format(remote_path))
+            self.log.error("Directory at {0} DOES exist. Fx returns True".format(remote_path))
             return True
 
     def check_directory_exists(self, remote_path):
         sftp = self._ssh_client.open_sftp()
         try:
-            log.info("Checking if the directory {0} exists or not.".format(remote_path))
+            self.log.info("Checking if the directory {0} exists or not.".format(remote_path))
             sftp.stat(remote_path)
         except IOError as e:
-            log.info(f'Directory at {remote_path} DOES NOT exist.')
+            self.log.info(f'Directory at {remote_path} DOES NOT exist.')
             sftp.close()
             return False
-        log.info("Directory at {0} exist.")
+        self.log.info("Directory at {0} exist.")
         sftp.close()
         return True
 
@@ -381,9 +384,9 @@ class CommonShellAPIs(object):
                 if dir_path != '/cygdrive/c/tmp':
                     output = self.remove_directory('/cygdrive/c/automation')
                     if output:
-                        log.info("{0} directory is removed.".format(dir_path))
+                        self.log.info("{0} directory is removed.".format(dir_path))
                     else:
-                        log.error("Can not delete {0} directory or directory {0} does not exist.".format(dir_path))
+                        self.log.error("Can not delete {0} directory or directory {0} does not exist.".format(dir_path))
                 self.create_directory(dir_path)
             sftp.close()
         except IOError:
@@ -396,13 +399,13 @@ class CommonShellAPIs(object):
                 for ele in word_check:
                     for x in output:
                         if ele.lower() in str(x.lower()):
-                            log.info("Found '{0} in output".format(ele))
+                            self.log.info("Found '{0} in output".format(ele))
                             found = True
                             break
             elif isinstance(word_check, str):
                 for x in output:
                     if word_check.lower() in str(x.lower()):
-                        log.info("Found '{0}' in output".format(word_check))
+                        self.log.info("Found '{0}' in output".format(word_check))
                         found = True
                         break
             else:
@@ -415,16 +418,16 @@ class CommonShellAPIs(object):
     def wait_till_file_deleted(self, remotepath, filename, timeout_in_seconds=180):
         end_time = time.time() + float(timeout_in_seconds)
         deleted = False
-        log.info("file {0} checked at {1}".format(filename, remotepath))
+        self.log.info("file {0} checked at {1}".format(filename, remotepath))
         while time.time() < end_time and not deleted:
             # get the process list
             exists = self.file_exists(remotepath, filename)
             if exists:
-                log.error('at {2} file {1} still exists' \
-                          .format(remotepath, filename, self.ip))
+                self.log.error('at {2} file {1} still exists' \
+                               .format(remotepath, filename, self.ip))
                 time.sleep(2)
             else:
-                log.info('at {2} FILE {1} DOES NOT EXIST ANYMORE!' \
+                self.log.info('at {2} FILE {1} DOES NOT EXIST ANYMORE!' \
                          .format(remotepath, filename, self.ip))
                 deleted = True
         return deleted
@@ -432,17 +435,17 @@ class CommonShellAPIs(object):
     def wait_till_file_added(self, remotepath, filename, timeout_in_seconds=180):
         end_time = time.time() + float(timeout_in_seconds)
         added = False
-        log.info("file {0} checked at {1}".format(filename, remotepath))
+        self.log.info("file {0} checked at {1}".format(filename, remotepath))
         while time.time() < end_time and not added:
             # get the process list
             exists = self.file_exists(remotepath, filename)
             if not exists:
-                log.error('at {2} file {1} does not exist' \
-                          .format(remotepath, filename, self.ip))
+                self.log.error('at {2} file {1} does not exist'
+                               .format(remotepath, filename, self.ip))
                 time.sleep(2)
             else:
-                log.info('at {2} FILE {1} EXISTS!' \
-                         .format(remotepath, filename, self.ip))
+                self.log.info('at {2} FILE {1} EXISTS!'
+                              .format(remotepath, filename, self.ip))
                 added = True
         return added
 
@@ -454,7 +457,7 @@ class CommonShellAPIs(object):
         process_running = False
         count_process_not_run = 0
         while time.time() < end_time and not process_ended:
-            output, error = self.execute_command("tasklist | grep {0}" \
+            output, error = self.execute_command("tasklist | grep {0}"
                                                  .format(process_name))
             self.log_command_output(output, error)
             if output and process_name in output[0]:
@@ -462,25 +465,25 @@ class CommonShellAPIs(object):
                 process_running = True
             else:
                 if process_running:
-                    log.info("{1}: Alright, PROCESS {0} ENDED!" \
-                             .format(process_name, self.ip))
+                    self.log.info("{1}: Alright, PROCESS {0} ENDED!"
+                                  .format(process_name, self.ip))
                     process_ended = True
                 else:
                     if count_process_not_run < 5:
-                        log.error("{1}: process {0} may not run" \
-                              .format(process_name, self.ip))
+                        self.log.error("{1}: process {0} may not run"
+                                       .format(process_name, self.ip))
                         self.sleep(5)
                         count_process_not_run += 1
                     else:
-                        log.error("{1}: process {0} did not run after 25 seconds"
-                                                   .format(process_name, self.ip))
+                        self.log.error("{1}: process {0} did not run after 25 seconds"
+                                       .format(process_name, self.ip))
                         mesg = "kill in/uninstall job due to process was not run" \
-                                                     .format(process_name, self.ip)
+                               .format(process_name, self.ip)
                         self.stop_current_python_running(mesg)
         if time.time() >= end_time and not process_ended:
-            log.info("Process {0} on node {1} is still running"
-                     " after 10 minutes VERSION.txt file was removed"
-                                      .format(process_name, self.ip))
+            self.log.info("Process {0} on node {1} is still running"
+                          " after 10 minutes VERSION.txt file was removed"
+                          .format(process_name, self.ip))
         return process_ended
 
     def remove_folders(self, list):
@@ -848,7 +851,7 @@ class CommonShellAPIs(object):
         self.log_command_output(o, r)
 
     def pause_memcached(self, timesleep=30, delay=0):
-        log.info("*** pause memcached process ***")
+        self.log.info("*** pause memcached process ***")
         if delay:
             time.sleep(delay)
         if self.nonroot:
@@ -856,11 +859,11 @@ class CommonShellAPIs(object):
         else:
             o, r = self.execute_command("killall -SIGSTOP memcached")
         self.log_command_output(o, r)
-        log.info("wait %s seconds to make node down." % timesleep)
+        self.log.info("wait %s seconds to make node down." % timesleep)
         time.sleep(timesleep)
 
     def unpause_memcached(self, os="linux"):
-        log.info("*** unpause memcached process ***")
+        self.log.info("*** unpause memcached process ***")
         if self.nonroot:
             o, r = self.execute_command("killall -SIGCONT memcached.bin")
         else:
@@ -891,19 +894,19 @@ class CommonShellAPIs(object):
     def get_process_statistics_parameter(self, parameter,
                                          process_name=None, process_pid=None):
        if not parameter:
-           log.error("parameter cannot be None")
+           self.log.error("parameter cannot be None")
 
        parameters_list = self.get_process_statistics(process_name, process_pid)
 
        if not parameters_list:
-           log.error("no statistics found")
+           self.log.error("no statistics found")
            return None
        parameters_dic = dict(item.split(' = ') for item in parameters_list)
 
        if parameter in parameters_dic:
            return parameters_dic[parameter]
        else:
-           log.error("parameter '{0}' is not found".format(parameter))
+           self.log.error("parameter '{0}' is not found".format(parameter))
            return None
 
     def set_node_name(self, name):
@@ -958,7 +961,7 @@ class CommonShellAPIs(object):
                          "chmod u=rwx /tmp/cmd.bat; /tmp/cmd.bat" % command
         o, r = self.execute_command_raw(remote_command)
         if r and r!=['']:
-            log.error("Command didn't run successfully. Error: {0}".format(r))
+            self.log.error("Command didn't run successfully. Error: {0}".format(r))
         return o, r
 
     def is_enterprise(self):
@@ -969,12 +972,12 @@ class CommonShellAPIs(object):
                                 "runtime.ini"):
                 runtime_file_path = "%s/opt/couchbase/etc/" % self.nr_home_path
             else:
-                log.info("couchbase server at {0} may not installed yet in nonroot server"
-                         .format(self.ip))
+                self.log.info("{} - Couchbase server may not yet installed in nonroot server"
+                              .format(self.ip))
         elif self.file_exists("/opt/couchbase/etc/", "runtime.ini"):
             runtime_file_path = "/opt/couchbase/etc/"
         else:
-            log.info("{} - Couchbase server not found".format(self.ip))
+            self.log.info("{} - Couchbase server not found".format(self.ip))
         output = self.read_remote_file(runtime_file_path, "runtime.ini")
         for x in output:
             x = x.strip()
@@ -1003,7 +1006,7 @@ class CommonShellAPIs(object):
 
     def stop_current_python_running(self, mesg):
         os.system("ps aux | grep python | grep %d " % os.getpid())
-        log.info(mesg)
+        self.log.info(mesg)
         self.sleep(5, "==== delay kill pid %d in 5 seconds to printout message ==="\
                                                                       % os.getpid())
         os.system('kill %d' % os.getpid())
