@@ -18,6 +18,17 @@ class Linux(LinuxConstants):
         self.shell.execute_command(cmd)
         return True
 
+    def pre_install(self, cluster_profile):
+
+        cmd = self.cmds
+        if self.shell.nonroot and cluster_profile != "default":
+            raise Exception("No support for installing {}".format(cluster_profile) +
+                            " cluster profile on non root")
+        cmd = cmd[self.shell.info.deliverable_type]["pre_install"]
+        cmd = cmd.format(cluster_profile)
+        self.shell.execute_command(cmd)
+        return True
+
     def install(self, build_url):
         cmd = self.cmds
         if self.shell.nonroot:

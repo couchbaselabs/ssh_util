@@ -14,13 +14,14 @@ from shell_util.remote_connection import RemoteMachineShellConnection
 
 
 class NodeInstallInfo(object):
-    def __init__(self, server, server_info, os_type, version, edition):
+    def __init__(self, server, server_info, os_type, version, edition, cluster_profile="default"):
         self.server = server
         self.server_info = server_info
         self.os_type = os_type
 
         self.version = version
         self.edition = edition
+        self.cluster_profile = cluster_profile
 
         self.build_url = None
         self.debug_build_url = None
@@ -272,6 +273,7 @@ class NodeInstaller(Thread):
                 self.node_install_info.state = "deep_cleaning"
             elif step == "pre_install":
                 self.node_install_info.state = "pre_install_procedure"
+                node_installer.pre_install(self.node_install_info.cluster_profile)
             elif step == "install":
                 self.node_install_info.state = "installing"
                 node_installer.install(self.node_install_info.build_url)

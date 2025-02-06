@@ -33,8 +33,11 @@ class LinuxConstants(object):
                 "(echo 'kernel.dmesg_restrict=0' >> /etc/sysctl.conf "
                 "&& service procps restart) ; "
 
-                "rm -rf" + default_install_dir,
-            "pre_install": None,
+                "rm -rf" + default_install_dir + " ; "
+                " rm -f /etc/couchbase.d/config_profile",
+            "pre_install": "mkdir -p /etc/couchbase.d ; "
+                           "echo {} > /etc/couchbase.d/config_profile ; "
+                           "chmod ugo+r /etc/couchbase.d/",
             "install": "apt-get -y -f install buildpath"
                        " > /dev/null && echo 1 || echo 0",
             "post_install":
@@ -47,8 +50,11 @@ class LinuxConstants(object):
             "uninstall": "{} yes | yum remove 'couchbase*' > /dev/null; "
                 "rm -rf {} {} > /dev/null && echo 1 || echo 0"
                 .format(unmount_nfs_cmd, default_install_dir,
-                        nonroot_install_dir),
-            "pre_install": None,
+                        nonroot_install_dir) + " ; "
+                " rm -f /etc/couchbase.d/config_profile",
+            "pre_install": "mkdir -p /etc/couchbase.d ; "
+                           "echo {} > /etc/couchbase.d/config_profile ; "
+                           "chmod ugo+r /etc/couchbase.d/",
             "install": "yes | yum localinstall -y buildpath"
                        " > /dev/null && echo 1 || echo 0",
             "set_vm_swappiness_and_thp":
@@ -83,7 +89,7 @@ class LinuxConstants(object):
                 " > /dev/null && echo 1 || echo 0"
                 .format(default_install_dir, nonroot_install_dir,
                         nonroot_download_dir),
-            "pre_install": None,
+            "pre_install": "",
             "install":
                 "mkdir " + nonroot_download_dir + "cb;"
                 "cd " +

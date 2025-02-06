@@ -40,10 +40,12 @@ class InstallHelper(object):
         parser = ArgumentParser(description="Installer for Couchbase-Server")
         parser.add_argument("--install_tasks",
                             help="List of tasks to run '-' separated",
-                            default="uninstall"
-                                    "-install"
-                                    "-init_cluster"
-                                    "-post_install_cleanup")
+                            default="populate_build_url"
+                                    "-check_url_status"
+                                    "-download_build"
+                                    "-uninstall"
+                                    "-pre_install"
+                                    "-install",)
         parser.add_argument("-i", "--ini", dest="ini",
                             help="Ini file path",
                             required=True)
@@ -54,6 +56,8 @@ class InstallHelper(object):
         parser.add_argument("--edition", default="enterprise",
                             help="CB edition",
                             choices=["enterprise", "community"])
+        parser.add_argument("--cluster_profile", default="default",
+                            choices=["default", "serverless", "provisioned", "columnar"])
         parser.add_argument("--url", default="",
                             help="Specific URL to use for build download")
         parser.add_argument("--storage_mode", default="plasma",
