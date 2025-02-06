@@ -64,7 +64,8 @@ def main(logger):
                             server_info,
                             helper.get_os(server_info),
                             args.version,
-                            args.edition))
+                            args.edition,
+                            args.cluster_profile))
 
     # Validate os_type across servers
     okay = helper.validate_server_status(node_helpers)
