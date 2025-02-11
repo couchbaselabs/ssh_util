@@ -45,7 +45,8 @@ class InstallHelper(object):
                                     "-download_build"
                                     "-uninstall"
                                     "-pre_install"
-                                    "-install",)
+                                    "-install"
+                                    "-init_cluster",)
         parser.add_argument("-i", "--ini", dest="ini",
                             help="Ini file path",
                             required=True)
