@@ -98,6 +98,8 @@ class TestInputServer(object):
         self.cbbackupmgr = {}
         self.hosted_on_cloud = False
         self.dummy = False
+        # To store the default n/w interface name (Eg: eth0 / enX0 / ...)
+        self.default_interface = None
 
     def __str__(self):
         #ip_str = "ip:{0}".format(self.ip)
