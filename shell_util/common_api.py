@@ -724,9 +724,9 @@ class CommonShellAPIs(object):
 
         if self.remote:
             for line in stdout.read().splitlines():
-                output.append(line.decode('utf-8'))
+                output.append(line.decode('utf-8', errors='replace'))
             for line in stderro.read().splitlines():
-                error.append(line.decode('utf-8'))
+                error.append(line.decode('utf-8', errors='replace'))
             if temp:
                 line = temp.splitlines()
                 output.extend(line)
