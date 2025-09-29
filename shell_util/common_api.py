@@ -327,7 +327,26 @@ class CommonShellAPIs(object):
 
     # create a remote file from input string
     def create_file(self, remote_path, file_data):
+        # Ensure parent directory exists
+        self._ensure_parent_directory_exists(remote_path)
+        
+        # Create the file
         output, error = self.execute_command("echo '{0}' > {1}".format(file_data, remote_path))
+
+    def _ensure_parent_directory_exists(self, file_path):
+        # Extract parent directory from file path
+        parent_dir = os.path.dirname(file_path)
+        
+        # Skip if no parent directory (file is in root)
+        if not parent_dir or parent_dir == file_path:
+            return
+            
+        try:
+            # Use existing create_directory method which handles both Windows and Unix
+            self.create_directory(parent_dir)
+        except Exception as e:
+            self.log.error(f"Failed to create parent directory {parent_dir}: {e}")
+            raise
 
     def find_file(self, remote_path, file):
         sftp = self._ssh_client.open_sftp()
